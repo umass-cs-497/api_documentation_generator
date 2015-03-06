@@ -11,7 +11,6 @@ FORMAT: 1A
 <span style="font-size:16px" >These are examples of the responses that one can expect to recieve from the API</span>
 
 
-
 ### <span style="color:rgb(41, 171, 41);">A Successful Response</span>
 
 This shows a response example of what a correctly used api with no errors would look like
@@ -57,11 +56,22 @@ This shows a response example of what an internal error would return
 ```
 
 
+## Current Points of Confusion
+------------------------------
+1. How are courses going to get made? By admin? Cause if so, s/he will need to have a list of instructors to select who is instructing a specific course. This would require a new API. An alternative to this is just entering the instructors email. 
+
+    ```html
+    /user/instructor GET
+    ```
+2. Continuing off of the one above, do we want the same for adding students?
+3. Do we want things like creating/editing a user to return the user object in the response? Or just a success?
+4. I have no idea how to document uploading the lectures....
+5. Update and delete user... should they be only done by the actual user themseleves or others like the admin?
 
 # Group Users
 
 ## User Generic [/user]
-API for generic users
+
 
 ### Create User [POST]
 Creates a new user
@@ -103,10 +113,10 @@ Gets logged in user info (private)
 
 
 ## User Specific [/user/{user_id}]
-API for a specific user. These api calls will only be used by the specified user so giving an "id" param may be pointless...
+These api calls will only be used by the specified user so giving an "id" param may be pointless...
 
 + Parameters
-    + user_id (string) : ID of the specific user
+    + user_id (string) : ID of the specified user
 
 
 ### Get User [GET]
@@ -119,7 +129,8 @@ Gets a user's info (public)
                 "status": "success",
                 "data":{
                     "first_name": "Jane",
-                    "last_name": "Doe"
+                    "last_name": "Doe",
+                    "profile_picture" : "bbb32283ff00004221.png"
                 }
             }
 
@@ -160,7 +171,7 @@ Deletes a user
 
 # Group Notifications
 
-## Get Notifications [/user/notification]
+## Notifications Generic [/user/notification]
 
 ### Get Notifications [GET]
 Gets the notifications of the logged in user
@@ -205,26 +216,27 @@ Gets the notifications of the logged in user
             }
         
 
-## Mark Read Notification [/user/notification/{notification_id}]
+## Notifications Specific [/user/notification/{notification_id}]
 
-### Mark Read Notification [PUT]
-Will mark a notification as read
+### Mark Read Notification [DELETE]
+Marks a notification as read
 
 + Parameters
-    + notification_id (string) : ID of a specific notification  
+    + notification_id (string) : ID of a specified notification  
     
 + Response 200 (application/json)
     + Body
     
             {
-                status : "Success",
-                data : {}
+                status : "success",
+                data : {
+
+                }
             }
 
 # Group Bookmarks
 
-## Create Bookmark [/user/bookmark]
-Allows for dealing will bookmarks
+## Bookmark Generic [/user/bookmark]
 
 ### Create Bookmark [POST]
 Creates a bookmark for the current user
@@ -236,7 +248,7 @@ Creates a bookmark for the current user
                 "course_id" : "dfb11e1f3c23000000007855",
                 "lecture_id" : "4cdfb11e1f3c000000007822",
                 "label" : "New Bookmark! :D",
-                "time" : "15825491740"
+                "time" : "140"
             }
 
 + Response 200 (application/json)
@@ -249,13 +261,13 @@ Creates a bookmark for the current user
             }
 
 ## Bookmark Specific [/user/bookmark/{bookmark_id}]
-Allows for dealing with specific bookmarks
+
 
 ### Delete Bookmark [DELETE]
-Deletes a specific bookmark based on it's ID
+Deletes a specified bookmark based on it's ID
 
 + Parameters
-    + bookmark_id (string) : ID of the specific bookmark
+    + bookmark_id (string) : ID of the specified bookmark
     
 + Response 200 (application/json)
     + Body
@@ -268,10 +280,10 @@ Deletes a specific bookmark based on it's ID
             }
 
 ### Edit Bookmark [PUT]
-Edits a specific bookmark based on it's ID
+Edits a specified bookmark based on it's ID
 
 + Parameters
-    + bookmark_id (string) : ID of the specific bookmark
+    + bookmark_id (string) : ID of the specified bookmark
 
 + Request
     + Body
@@ -291,33 +303,33 @@ Edits a specific bookmark based on it's ID
             }
 
 
-## Get Course Bookmarks [/user/bookmark/course/{course_id}]
-Course Specific Bookmark API calls
+## Bookmark Course Specific [/user/bookmark/course/{course_id}]
+
 
 ### Get Course Bookmarks [GET]
-Gets all of the current user's bookmarks for a specific course
+Gets all of the current user's bookmarks for a specified course
 
 + Parameters
-    + course_id (string) : ID of the specific course
+    + course_id (string) : ID of the specified course
 
             
 + Response 200 (application/json)
     + Body
     
             {
-                "status" : "success".
+                "status" : "success",
                 "data" : {
                         "bookmarks" : [
                             {
-                                "bookmark_id" : "bbda1e1f3c23000000007551"
+                                "bookmark_id" : "bbda1e1f3c23000000007551",
                                 "label" : "This is a bookmark!",
-                                "time" : "27854724576",
+                                "time" : "2000",
                                 "lecture_id" : "dfaa1e1f3c23000000007855"
                             },
                             {
-                                "bookmark_id" : "bbda1e1f3c23000000001111"
+                                "bookmark_id" : "bbda1e1f3c23000000001111",
                                 "label" : "This is a bookmark too!",
-                                "time" : "27854714576",
+                                "time" : "11",
                                 "lecture_id" : "ccca1e1f3c23000000007444"
                             },
                         ]
@@ -325,15 +337,14 @@ Gets all of the current user's bookmarks for a specific course
             }
 
 
-##Get Lecture Bookmarks [/user/bookmark/{course_id}/lecture/{lecture_id}]
-Lecture Specific Bookmark API calls
+##Bookmark Lecture Specific [/user/bookmark/{course_id}/lecture/{lecture_id}]
 
 ###Get Lecture Bookmarks [GET]
-Gets all of the current user's bookmarks for a specific lecture
+Gets all of the current user's bookmarks for a specified lecture
 
 + Parameters
-    + course_id (string) : ID of the specific course
-    + lecture_id (string) : ID of the specific lecture
+    + course_id (string) : ID of the specified course
+    + lecture_id (string) : ID of the specified lecture
     
 + Response 200 (application/json)
     + Body
@@ -343,12 +354,12 @@ Gets all of the current user's bookmarks for a specific lecture
                 "data" : {
                         "bookmarks" : [
                             {
-                                "bookmark_id" : "bbda1e1f3c23000000007551"
+                                "bookmark_id" : "bbda1e1f3c23000000007551",
                                 "label" : "This is a bookmark!",
                                 "time" : "27854724576"
                             },
                             {
-                                "bookmark_id" : "bbda1e1f3c23000000001111"
+                                "bookmark_id" : "bbda1e1f3c23000000001111",
                                 "label" : "This is a bookmark too!",
                                 "time" : "27854714576"
                             },
@@ -358,8 +369,7 @@ Gets all of the current user's bookmarks for a specific lecture
 
 # Group Courses
 
-##Add A Course [/course]
-Course Generic API calls
+##Course Generic [/course]
 
 ###Add A Course [POST]
 Adds a course to the system (will add more request fields)
@@ -387,76 +397,103 @@ Adds a course to the system (will add more request fields)
             }
 
 ##Course Specific [/course/{course_id}]
-Course Specific API calls
 
-###Get Course [GET]
-Gets all of the information for a specific course
+
+### Get Course [GET]
+Gets all of the information for a specified course
 
 + Parameters
-    + course_id (string) : ID for specific course
+    + course_id (string) : ID for specified course
+
+
++ Response 200 (application/json)
+    + Body
+            
+            {
+                "department" : "Computer Science",
+                "department_shorthand" : "CS",
+                "course_name" : "Web Scalability",
+                "course_number" : "497s",
+                "description" : "A \"class\" about web stuff",
+                "section" : "01",
+                "term" : "Spring",
+                "year" : "2015",
+                "instructor_id" : "23ffaaccdd2330002288",
+                "lectures":
+                    [
+                        {
+                            "lecture_id" : "27dcccad253452a00011",
+                            "title" : "Lecture 4: What is the Interwebs?",
+                            "description" : "This lecture is awesome and you don't want to miss it",
+                            "time_posted" : "1337622367267",
+                            "time_length" : "3026",
+                            "thumbnail" : "http://url.to/thumbnail/here.jpg"
+                        },
+                        {
+                            "lecture_id" : "113ccad253452a00222",
+                            "title" : "Lecture 5: Databases",
+                            "description" : "We will talk about how to store huge amounts of data",
+                            "time_posted" : "1337623117267",
+                            "time_length" : "2026",
+                            "thumbnail" : "http://url.to/thumbnail/here.jpg"
+                        }
+                    ]
+            }
+
+
+### Edit Course [PUT]
+Edits a course's basic information
+
++ Parameters
+    + course_id (string) : ID for specified course
 
 + Request
     + Body
         
             {
-
+                "department" : "Computer Science",
+                "department_shorthand" : "CS",
+                "course_name" : "Web Scalability",
+                "course_number" : "497s",
+                "description" : "A \"class\" about web stuff",
+                "section" : "01",
+                "term" : "Spring",
+                "year" : "2015",
+                "instructor_id" : "23ffaaccdd2330002288",
             }
 
 + Response 200 (application/json)
     + Body
             
             {
+                "status" : "success",
+                "data" : {
 
+                }
             }
 
-
-###Edit Course [PUT]
-Edits a course
+### Delete Course [DELETE]
+Deletes a specified course
 
 + Parameters
-    + course_id (string) : ID for specific course
-
-+ Request
-    + Body
-        
-            {
-
-            }
+    + course_id (string) : ID for specified course
 
 + Response 200 (application/json)
     + Body
             
             {
+                "status" : "success",
+                "data" : {
 
-            }
-
-###Delete Course [DELETE]
-Deletes a specific course
-
-+ Parameters
-    + course_id (string) : ID for specific course
-
-+ Request
-    + Body
-        
-            {
-
-            }
-
-+ Response 200 (application/json)
-    + Body
-            
-            {
-
+                }
             }
 
 # Group Roster
 
-##Course Roster [/course/{course_id}/roster/]
-Course Roster Specific API calls
+## Roster Generic [/course/{course_id}/roster/]
 
-###Get Course Roster [GET]
-Gets the roster of the specific course
+### Get Course Roster [GET]
+Gets the roster of the specified course
 
 + Parameters
     + course_id (string) : ID of the course
@@ -470,7 +507,13 @@ Gets the roster of the specific course
                     roster : [
                         {
                             "user_name" : "Jane Doe",
-                            "user_id" : "ffcc5143aa0000882"
+                            "user_id" : "ffcc5143aa0000882",
+                            "profile_picture" : "http://path/to/pic.jpg"
+                        },
+                        {
+                            "user_name" : "Jan Itor",
+                            "user_id" : "abcc5143aa0000111",
+                            "profile_picture" : "http://path/to/pic.jpg"
                         }
                     ]
                 }
@@ -487,14 +530,17 @@ Adds a *single* user by _email_ to the roster of the specified course
     + Body
 
             {
-
+                "user_id" : "67253ccdaf00002213"
             }
 
 + Response 200 (application/json)
     + Body
 
             {
+                "status" : "success",
+                "data" : {
 
+                }
             }
 
 ###Add Users To Roster [POST]
@@ -521,14 +567,17 @@ Adds a *group* of users by a file of _emails_ to the roster of the specified cou
     + Body
 
             {
+                "status" : "success",
+                "data" :{
 
+                }
             }
 
 
-##Delete A User From Roster [/course/{course_id}/roster/{user_id}]
+##Roster Specific [/course/{course_id}/roster/{user_id}]
 
-###Delete A User From Roster[DELETE]
-Deletes a specified user from the specified course
+###Remove User From Roster[DELETE]
+Removes a specified user from the specified course
 
 + Parameters
     + course_id (string) : ID of the course
@@ -538,16 +587,45 @@ Deletes a specified user from the specified course
     + Body
 
             {
+                "status" : "success",
+                "data" : {
 
+                }
             }
 
 
 # Group Lectures
 
-## Lecture Generic API [/course/{course_id}/lecture]
+## Lecture Generic [/course/{course_id}/lecture]
 
-### Add Lecture Manually [POST]
-Allows a lecture to be added manually
+###TODO Add Lecture Man. [POST]
+Allows a lecture to be added manually such as a screencast
+
++ Parameters
+    + course_id (string) : ID of the course
+
++ Request
+    + Body
+
+            {
+                "title" : "Lecture 1: How to API",
+                "description" : "For this lecture, we will just REST",
+
+
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "status" : "success",
+                "data" : {
+                    "lecture_id" : "ff2653ca16000ff32cd"
+                }
+            }
+
+### TODO Add Lecture Auto [POST]
+Allows a lecture to be added automatically via the lecture capturing system
 
 + Parameters
     + course_id (string) : ID of the course
@@ -562,23 +640,7 @@ Allows a lecture to be added manually
                 }
             }
 
-### Add Lecture Automatically [POST]
-Allows a lecture to be added automatically via lecture capturing system
-
-+ Parameters
-    + course_id (string) : ID of the course
-
-+ Response 200 (application/json)
-    + Body
-
-            {
-                "status" : "success",
-                "data" : {
-                    "lecture_id" : "ff2653ca16000ff32cd"
-                }
-            }
-
-## (TODO) Lecture Specific API [/course/{course_id}/lecture/{lecture_id}]
+## Lecture Specific [/course/{course_id}/lecture/{lecture_id}]
 
 + Parameters
     + course_id (string) : ID of the course
@@ -586,7 +648,7 @@ Allows a lecture to be added automatically via lecture capturing system
 
 
 ### Get A Lecture [GET]
-Gets a specific lecture
+Gets a specified lecture
 
 + Response 200 (application/json)
     + Body
@@ -594,12 +656,27 @@ Gets a specific lecture
             {
                 "status" : "success",
                 "data" : {
-                    
+                    "title" : "Lecture 4: What is the Interwebs?",
+                    "description" : "This lecture is awesome and you don't want to miss it",
+                    "time_posted" : "1337622367267",
+                    "time_length" : "3026",
+                    "thumbnail" : "http://url.to/thumbnail/here.jpg"
                 }
             }
 
 ### Edit A Lecture [PUT]
-Edits a specific lecture
+Edits a specified lecture
+
++ Request 
+    + Body
+            {
+                "lecture_id" : "27dcccad253452a00011",
+                "title" : "Lecture 4: What is the Interwebs?",
+                "description" : "This lecture is awesome and you don't want to miss it",
+                "time_posted" : "1337622367267",
+                "time_length" : "3026",
+                "thumbnail" : "http://url.to/thumbnail/here.jpg"
+            }
 
 + Response 200 (application/json)
     + Body
@@ -612,7 +689,7 @@ Edits a specific lecture
             }
 
 ### Delete A Lecture [DELETE]
-Deletes a specific lecture
+Deletes a specified lecture
 
 + Response 200 (application/json)
     + Body
@@ -633,15 +710,22 @@ Deletes a specific lecture
     + course_id (string) : ID of the course
     + lecture_id (string) : ID of the lecture
 
-### Add Attachment To Lecture [POST]
+### Add Attachment [POST]
 Adds an attachment to a lecture
 
-+ Request
-    + Body
++ Request (multipart/form-data; boundary=---BOUNDARY)
 
-            {
+        -----BOUNDARY
+        Content-Disposition: form-data; name="jpg[file]"; filename="importantFile.jpg"
+        Content-Type: image/jpeg
+        Content-Transfer-Encoding: base64
 
-            }
+        /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+        HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+        MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIA
+        AhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEB
+        AAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AL+AD//Z
+        -----BOUNDARY
 
 + Response
     + Body
@@ -660,7 +744,7 @@ Adds an attachment to a lecture
     + lecture_id (string) : ID of the lecture
     + attachment_id (string) : ID of the attachment
 
-### Deletes Attachment From Lecture [DELETE]
+### Delete Attachment [DELETE]
 Deletes an attachment from a lecture
 
 + Response
@@ -691,18 +775,50 @@ Gets the comments for the specified lecture
             {
                 "status" : "success",
                 "data" : {
-                    
+                    "commments" : [
+                        {
+                            "name": "Bill Howard",
+                            "user_id": "190accdff12700001123",
+                            "posted_date": "19836263546",
+                            "time" : "1234",
+                            "content": "Explain slide 55 in more detail please",
+                            "replies": [
+                                {
+                                    "name": "Jane Doe",
+                                    "user_id": "12aacdd12700004444",
+                                    "posted_date": "19836293546",
+                                    "time" : "1234",
+                                    "content": "It's talking about the internet",
+                                    "replies": [
+                                    
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "John Doe",
+                            "user_id": "999fcdff12700005353",
+                            "posted_date": "19836213516",
+                            "time" : "1234",
+                            "content": "This was a really helpful part of the lecture.",
+                            "replies": [
+                                
+                            ]
+                        }
+                    ]
                 }
             }
 
 ### Add Lecture Comment [POST]
-Adds a new comment for the specified lecture
+Adds a new comment to the specified lecture
 
 + Request
     + Body
 
             {
-
+                "content" : "Is this the krusty krab?",
+                "posted_date" : "23252323232"
+                "time" : "1234"
             }
 
 + Response 200 (application/json)
@@ -711,7 +827,7 @@ Adds a new comment for the specified lecture
             {
                 "status" : "success",
                 "data" : {
-                    
+                    "comment_id" : "123bcda1300002211"
                 }
             }
 
@@ -723,7 +839,7 @@ Adds a new comment for the specified lecture
     + comment_id (string) : ID of the comment
 
 ### Delete Comment [DELETE]
-Deletes the comment
+Deletes the specified comment (We may need to keep the comment but change the content to "[Deleted]")
 
 + Response 200 (application/json)
     + Body
@@ -736,13 +852,13 @@ Deletes the comment
             }
 
 ### Edit Comment [PUT]
-Edits specific comment
+Edits the specified comment
 
 + Request
     + Body
 
             {  
-                
+                "content" : "Is this the chum bucket?"
             }
 
 + Response 200 (application/json)
@@ -756,13 +872,15 @@ Edits specific comment
             }
 
 ### Reply To Comment [POST]
-Replies to a specific comment
+Replies to a specified comment
 
 + Request
     + Body
 
             {  
-                
+                "content" : "No this is patrick.",
+                "posted_date" : "1342425525",
+                "time" : "1234"
             }
 
 + Response 200 (application/json)

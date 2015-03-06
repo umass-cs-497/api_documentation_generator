@@ -20,9 +20,14 @@ fs.readFile('./files/source/' + file + '.md', 'utf8', function (err,data) {
 
   // Render a blueprint with a template by name
 var blueprint = data;
-var template = 'slate-multi';
 
-aglio.render(blueprint, template, function (err, html, warnings) {
+var options = {
+  template : 'slate-multi',
+  condenseNav : false
+
+};
+
+aglio.render(blueprint, options, function (err, html, warnings) {
     if (err) return console.log(err);
     if (warnings) console.log(warnings);
 
