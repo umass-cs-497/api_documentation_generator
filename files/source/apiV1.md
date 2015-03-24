@@ -58,15 +58,7 @@ This shows a response example of what an internal error would return
 
 ## Current Points of Confusion
 ------------------------------
-1. How are courses going to get made? By admin? Cause if so, s/he will need to have a list of instructors to select who is instructing a specific course. This would require a new API. An alternative to this is just entering the instructors email. 
-
-    ```html
-    /user/instructor GET
-    ```
-2. Continuing off of the one above, do we want the same for adding students?
-3. Do we want things like creating/editing a user to return the user object in the response? Or just a success?
-4. I have no idea how to document uploading the lectures....
-5. Update and delete user... should they be only done by the actual user themseleves or others like the admin?
+Still don't know how to do the lecture uploading
 
 # Group Users
 
@@ -92,7 +84,10 @@ Creates a new user
             {
                 "status": "success",
                 "data": {
-                    "user_id": "4cdfb11e1f3c000000007822"
+                    "user_id": "4cdfb11e1f3c000000007822",
+                    "email" : "jdoe@umass.edu",
+                    "first_name" : "Jane",
+                    "last_name" : "Doe"
                 }
             }
             
@@ -107,7 +102,7 @@ Gets logged in user info (private)
                 "data":{
                     "first_name": "Jane",
                     "last_name": "Doe",
-                    "course_list": [{"name" : "CS187 Data Structures", "id": "4cdfb11e1f3c000000007822"}]
+                    "course_list": [{"name" : "CS187 Data Structures", "course_id": "4cdfb11e1f3c000000007822"}]
                 }
             }
 
@@ -116,7 +111,7 @@ Gets logged in user info (private)
 These api calls will only be used by the specified user so giving an "id" param may be pointless...
 
 + Parameters
-    + user_id (string) : ID of the specified user
+    + user_id (string)...ID of the specified user
 
 
 ### Get User [GET]
@@ -151,7 +146,10 @@ Updates a user's info
             {
                 "status": "success",
                 "data":{
-    
+                    "user_id":"17857351476173",
+                    "first_name": "Jane",
+                    "last_name": "Doe",
+                    "course_list": [{"name" : "CS187 Data Structures", "course_id": "4cdfb11e1f3c000000007822"}]
                 }
             }
 
@@ -164,7 +162,78 @@ Deletes a user
             {
                 "status": "success",
                 "data":{
-    
+                    "user_id" : "17766664000ffdd10"
+                }
+            }
+
+
+# Group Authentication
+
+## Auth Verify [/auth/verify/{verify_id}]
+
++ Parameters
+    + verify_id (string)...Randomly generated unique number that was emailed in a link to the user
+
+### Verification [GET]
+Allows a user to verify that they own their email.
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "status" : "success",
+                "data" :{
+                
+                }
+            }
+
+
+## Auth Login [/auth/login]
+
+### Login [POST]
+Allows a user to log into the system
+
++ Request
+    + Body
+
+            {
+                "user_email" : "test@umass.edu",
+                "user_password" : "password"
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "status" : "success",
+                "data" :{
+                
+                }
+            }
+
++ Response 403 (application/json)
+    + Body
+
+            {
+                "status" : "failed",
+                "data" :{
+                    "message" : "The email and/or password are incorrect"
+                }
+            }
+
+## Auth Logout [/auth/logout]
+
+### Logout [POST]
+Allows a user to log themselves out of the system. Will delete session info on server.
+
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "status" : "success",
+                "data" :{
+                
                 }
             }
 
@@ -215,6 +284,23 @@ Gets the notifications of the logged in user
                 }
             }
         
+### Mark Read All Notifications [DELETE]
+Marks all notifications as read
+    
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "status" : "success",
+                "data" : {
+                    "notification_ids" : [
+                        "39ffccaa00002311",
+                        "85ff4ccaa00002323",
+                        "3134ccaa000023547",
+                        "11284cca00023575"
+                        ]
+                }
+            }
 
 ## Notifications Specific [/user/notification/{notification_id}]
 
@@ -222,15 +308,15 @@ Gets the notifications of the logged in user
 Marks a notification as read
 
 + Parameters
-    + notification_id (string) : ID of a specified notification  
+    + notification_id (string)...ID of a specified notification  
     
 + Response 200 (application/json)
     + Body
     
             {
-                status : "success",
-                data : {
-
+                "status" : "success",
+                "data" : {
+                    "notification_id" : "3984ccaa00002323"
                 }
             }
 
@@ -255,9 +341,14 @@ Creates a bookmark for the current user
     + Body
     
             {
-                "success" : "true",
+                "status" : "success",
                 "data":{
-                    "bookmark_id" : "dfaa1e1f3c23000000007855"
+                    "bookmark_id" : "dfaa1e1f3c23000000007855",
+                    "course_id" : "aaaa1e1f3c23000000007855",
+                    "lecture_id" : "4cdfb11e1f3c000000007822",
+                    "label" : "New Bookmark! :D",
+                    "time" : "140"
+                }
             }
 
 ## Bookmark Specific [/user/bookmark/{bookmark_id}]
@@ -267,7 +358,7 @@ Creates a bookmark for the current user
 Deletes a specified bookmark based on it's ID
 
 + Parameters
-    + bookmark_id (string) : ID of the specified bookmark
+    + bookmark_id (string)...ID of the specified bookmark
     
 + Response 200 (application/json)
     + Body
@@ -275,7 +366,7 @@ Deletes a specified bookmark based on it's ID
             {
                 "status" : "success",
                 "data" : {
-                    
+                    "bookmark_id" : "dfaa1e1f3c23000000007855"
                 }
             }
 
@@ -283,7 +374,7 @@ Deletes a specified bookmark based on it's ID
 Edits a specified bookmark based on it's ID
 
 + Parameters
-    + bookmark_id (string) : ID of the specified bookmark
+    + bookmark_id (string)...ID of the specified bookmark
 
 + Request
     + Body
@@ -298,7 +389,11 @@ Edits a specified bookmark based on it's ID
             {
                 "status" : "success",
                 "data" : {
-
+                    "bookmark_id" : "dfaa1e1f3c23000000007855",
+                    "course_id" : "aaaa1e1f3c23000000007855",
+                    "lecture_id" : "4cdfb11e1f3c000000007822",
+                    "label" : "This is the new label!",
+                    "time" : "140"
                 }
             }
 
@@ -310,7 +405,7 @@ Edits a specified bookmark based on it's ID
 Gets all of the current user's bookmarks for a specified course
 
 + Parameters
-    + course_id (string) : ID of the specified course
+    + course_id (string)...ID of the specified course
 
             
 + Response 200 (application/json)
@@ -343,8 +438,8 @@ Gets all of the current user's bookmarks for a specified course
 Gets all of the current user's bookmarks for a specified lecture
 
 + Parameters
-    + course_id (string) : ID of the specified course
-    + lecture_id (string) : ID of the specified lecture
+    + course_id (string)...ID of the specified course
+    + lecture_id (string)...ID of the specified lecture
     
 + Response 200 (application/json)
     + Body
@@ -372,7 +467,7 @@ Gets all of the current user's bookmarks for a specified lecture
 ##Course Generic [/course]
 
 ###Add A Course [POST]
-Adds a course to the system (will add more request fields)
+Adds a course to the system
 
 + Request
     + Body
@@ -383,7 +478,7 @@ Adds a course to the system (will add more request fields)
                 "course_number" : "497s",
                 "term" : "Spring",
                 "year" : "2015",
-                "instructor_id" : "23ffaaccdd2330002288"
+                "instructor_email" : "instructor@umass.edu"
             }
 
 + Response 200 (application/json)
@@ -392,7 +487,13 @@ Adds a course to the system (will add more request fields)
             {
                 "status" : "success",
                 "data" : {
-                    "course_id" : "55aadfeecd3300113344"
+                    "course_id" : "55aadfeecd3300113344",
+                    "department" : "Computer Science",
+                    "course_name" : "Web Scalability",
+                    "course_number" : "497s",
+                    "term" : "Spring",
+                    "year" : "2015",
+                    "instructor_email" : "instructor@umass.edu"
                 }
             }
 
@@ -403,7 +504,7 @@ Adds a course to the system (will add more request fields)
 Gets all of the information for a specified course
 
 + Parameters
-    + course_id (string) : ID for specified course
+    + course_id (string)...ID for specified course
 
 
 + Response 200 (application/json)
@@ -445,7 +546,7 @@ Gets all of the information for a specified course
 Edits a course's basic information
 
 + Parameters
-    + course_id (string) : ID for specified course
+    + course_id (string)...ID for specified course
 
 + Request
     + Body
@@ -459,7 +560,7 @@ Edits a course's basic information
                 "section" : "01",
                 "term" : "Spring",
                 "year" : "2015",
-                "instructor_id" : "23ffaaccdd2330002288",
+                "instructor_email" : "instructor@umass.edu"
             }
 
 + Response 200 (application/json)
@@ -468,7 +569,16 @@ Edits a course's basic information
             {
                 "status" : "success",
                 "data" : {
-
+                    "course_id" : "aabbf22313f0001231",
+                    "department" : "Computer Science",
+                    "department_shorthand" : "CS",
+                    "course_name" : "Web Scalability",
+                    "course_number" : "497s",
+                    "description" : "A \"class\" about web stuff",
+                    "section" : "01",
+                    "term" : "Spring",
+                    "year" : "2015",
+                    "instructor_email" : "instructor@umass.edu"
                 }
             }
 
@@ -476,7 +586,7 @@ Edits a course's basic information
 Deletes a specified course
 
 + Parameters
-    + course_id (string) : ID for specified course
+    + course_id (string)...ID for specified course
 
 + Response 200 (application/json)
     + Body
@@ -484,7 +594,7 @@ Deletes a specified course
             {
                 "status" : "success",
                 "data" : {
-
+                    "course_id" : "aabbf22313f0001231"
                 }
             }
 
@@ -496,7 +606,7 @@ Deletes a specified course
 Gets the roster of the specified course
 
 + Parameters
-    + course_id (string) : ID of the course
+    + course_id (string)...ID of the course
 
 + Response 200 (application/json)
     + Body
@@ -524,13 +634,13 @@ Gets the roster of the specified course
 Adds a *single* user by _email_ to the roster of the specified course
 
 + Parameters
-    + course_id (string) : ID of the course
+    + course_id (string)...ID of the course
 
 + Request
     + Body
 
             {
-                "user_id" : "67253ccdaf00002213"
+                "user_email" : "testuser@umass.edu"
             }
 
 + Response 200 (application/json)
@@ -538,16 +648,27 @@ Adds a *single* user by _email_ to the roster of the specified course
 
             {
                 "status" : "success",
-                "data" : {
-
+                "data" :{
+                    roster : [
+                        {
+                            "user_name" : "Jane Doe",
+                            "user_id" : "ffcc5143aa0000882",
+                            "profile_picture" : "http://path/to/pic.jpg"
+                        },
+                        {
+                            "user_name" : "Jan Itor",
+                            "user_id" : "abcc5143aa0000111",
+                            "profile_picture" : "http://path/to/pic.jpg"
+                        }
+                    ]
                 }
             }
 
 ###Add Users To Roster [POST]
-Adds a *group* of users by a file of _emails_ to the roster of the specified course (Figure out how to upload files and show how thats required in here)
+Adds a *group* of users by a file of _emails_ to the roster of the specified course 
 
 + Parameters
-    + course_id (string) : ID of the course
+    + course_id (string)...ID of the course
 
 + Request (multipart/form-data; boundary=---BOUNDARY)
 
@@ -569,7 +690,18 @@ Adds a *group* of users by a file of _emails_ to the roster of the specified cou
             {
                 "status" : "success",
                 "data" :{
-
+                    roster : [
+                        {
+                            "user_name" : "Jane Doe",
+                            "user_id" : "ffcc5143aa0000882",
+                            "profile_picture" : "http://path/to/pic.jpg"
+                        },
+                        {
+                            "user_name" : "Jan Itor",
+                            "user_id" : "abcc5143aa0000111",
+                            "profile_picture" : "http://path/to/pic.jpg"
+                        }
+                    ]
                 }
             }
 
@@ -580,8 +712,8 @@ Adds a *group* of users by a file of _emails_ to the roster of the specified cou
 Removes a specified user from the specified course
 
 + Parameters
-    + course_id (string) : ID of the course
-    + user_id (string) : ID of the user
+    + course_id (string)...ID of the course
+    + user_id (string)...ID of the user
 
 + Response 200 (application/json)
     + Body
@@ -589,7 +721,7 @@ Removes a specified user from the specified course
             {
                 "status" : "success",
                 "data" : {
-
+                    "user_id" : "ffa4142cc00001213"
                 }
             }
 
@@ -602,7 +734,7 @@ Removes a specified user from the specified course
 Allows a lecture to be added manually such as a screencast
 
 + Parameters
-    + course_id (string) : ID of the course
+    + course_id (string)...ID of the course
 
 + Request
     + Body
@@ -628,7 +760,7 @@ Allows a lecture to be added manually such as a screencast
 Allows a lecture to be added automatically via the lecture capturing system
 
 + Parameters
-    + course_id (string) : ID of the course
+    + course_id (string)...ID of the course
 
 + Response 200 (application/json)
     + Body
@@ -643,8 +775,8 @@ Allows a lecture to be added automatically via the lecture capturing system
 ## Lecture Specific [/course/{course_id}/lecture/{lecture_id}]
 
 + Parameters
-    + course_id (string) : ID of the course
-    + lecture_id (string) : ID of the lecture
+    + course_id (string)...ID of the course
+    + lecture_id (string)...ID of the lecture
 
 
 ### Get A Lecture [GET]
@@ -670,7 +802,6 @@ Edits a specified lecture
 + Request 
     + Body
             {
-                "lecture_id" : "27dcccad253452a00011",
                 "title" : "Lecture 4: What is the Interwebs?",
                 "description" : "This lecture is awesome and you don't want to miss it",
                 "time_posted" : "1337622367267",
@@ -684,7 +815,13 @@ Edits a specified lecture
             {
                 "status" : "success",
                 "data" : {
-                    
+                    "course_id" : "225ccddaadc100021212",
+                    "lecture_id" : "27dcccad253452a00011",
+                    "title" : "Lecture 4: What is the Interwebs?",
+                    "description" : "This lecture is awesome and you don't want to miss it",
+                    "time_posted" : "1337622367267",
+                    "time_length" : "3026",
+                    "thumbnail" : "http://url.to/thumbnail/here.jpg"
                 }
             }
 
@@ -697,7 +834,8 @@ Deletes a specified lecture
             {
                 "status" : "success",
                 "data" : {
-                    
+                    "course_id" : "121314000ff121",
+                    "lecture_id" : "abbf3141000023"
                 }
             }
 
@@ -707,8 +845,8 @@ Deletes a specified lecture
 ## Attachment Generic [/course/{course_id}/lecture/{lecture_id}/]
 
 + Parameters
-    + course_id (string) : ID of the course
-    + lecture_id (string) : ID of the lecture
+    + course_id (string)...ID of the course
+    + lecture_id (string)...ID of the lecture
 
 ### Add Attachment [POST]
 Adds an attachment to a lecture
@@ -727,22 +865,31 @@ Adds an attachment to a lecture
         AAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AL+AD//Z
         -----BOUNDARY
 
+        {
+            "attachment_name" : "Special Instructions"
+        }
+
+
 + Response
     + Body
 
             {
                 "status" : "success",
                 "data" : {
-                    "attachment_id" : "4972ddffcca200001234"
+                    "attachment_id" : "4972ddffcca200001234",
+                    "attachment_url" : "4972ddffcca200001234.jpg",
+                    "attachment_name" : "Special Instructions"
+                    "course_id" : "144ffa1230001212",
+                    "lecture_id" : "12ff51216aac0001"
                 }
             }
 
 ## Attachment Specific [/course/{course_id}/lecture/{lecture_id}/{attachment_id}]
 
 + Parameters
-    + course_id (string) : ID of the course
-    + lecture_id (string) : ID of the lecture
-    + attachment_id (string) : ID of the attachment
+    + course_id (string)...ID of the course
+    + lecture_id (string)...ID of the lecture
+    + attachment_id (string)...ID of the attachment
 
 ### Delete Attachment [DELETE]
 Deletes an attachment from a lecture
@@ -753,7 +900,9 @@ Deletes an attachment from a lecture
             {
                 "status" : "success",
                 "data" : {
-                   
+                    "attachment_id" : "4972ddffcca200001234",
+                    "course_id" : "144ffa1230001212",
+                    "lecture_id" : "12ff51216aac0001"
                 }
             }
 
@@ -763,8 +912,8 @@ Deletes an attachment from a lecture
 ## Comment Generic [/course/{course_id}/lecture/{lecture_id}/comment]
 
 + Parameters
-    + course_id (string) : ID of the course
-    + lecture_id (string) : ID of the lecture
+    + course_id (string)...ID of the course
+    + lecture_id (string)...ID of the lecture
 
 ### Get Lecture Comments [GET]
 Gets the comments for the specified lecture
@@ -827,16 +976,19 @@ Adds a new comment to the specified lecture
             {
                 "status" : "success",
                 "data" : {
-                    "comment_id" : "123bcda1300002211"
+                    "comment_id" : "123bcda1300002211",
+                    "content" : "Is this the krusty krab?",
+                    "posted_date" : "23252323232"
+                    "time" : "1234"
                 }
             }
 
 ## Comment Specific [/course/{course_id}/lecture/{lecture_id}/comment/{comment_id}]
 
 + Parameters
-    + course_id (string) : ID of the course
-    + lecture_id (string) : ID of the lecture
-    + comment_id (string) : ID of the comment
+    + course_id (string)...ID of the course
+    + lecture_id (string)...ID of the lecture
+    + comment_id (string)...ID of the comment
 
 ### Delete Comment [DELETE]
 Deletes the specified comment (We may need to keep the comment but change the content to "[Deleted]")
@@ -847,7 +999,9 @@ Deletes the specified comment (We may need to keep the comment but change the co
             {
                 "status" : "success",
                 "data" : {
-                    
+                    "comment_id" : "4972ddffcca200001234",
+                    "course_id" : "144ffa1230001212",
+                    "lecture_id" : "12ff51216aac0001"
                 }
             }
 
@@ -856,7 +1010,6 @@ Edits the specified comment
 
 + Request
     + Body
-
             {  
                 "content" : "Is this the chum bucket?"
             }
@@ -867,7 +1020,13 @@ Edits the specified comment
             {
                 "status" : "success",
                 "data" : {
-                    
+
+                    "comment_id" : "123bcda1300002211",
+                    "content" : "Is this the chum bucket?",
+                    "posted_date" : "23252323232",
+                    "time" : "1234",
+                    "course_id" : "144ffa1230001212",
+                    "lecture_id" : "12ff51216aac0001"
                 }
             }
 
@@ -889,7 +1048,11 @@ Replies to a specified comment
             {
                 "status" : "success",
                 "data" : {
-                    "comment_id" : "ffacd34529800002422"
+                    "parent_comment_id" : "4972ddffcca200001234",
+                    "reply_comment_id" : "ffacd34529800002422",
+                    "content" : "No this is patrick.",
+                    "posted_date" : "1342425525",
+                    "time" : "1234"
                 }
             }
 
