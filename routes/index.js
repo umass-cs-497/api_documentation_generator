@@ -27,10 +27,13 @@ var options = {
 
 };
 
+console.log("Rendering...")
+
 aglio.render(blueprint, options, function (err, html, warnings) {
     if (err) return console.log(err);
     if (warnings) console.log(warnings);
 
+    console.log("Writing html file...")
     fs.writeFile('./files/output/' + file + '.html', html, function(err) {
     if(err) {
         console.log(err);

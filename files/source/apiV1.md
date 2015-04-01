@@ -37,7 +37,7 @@ This shows a response example of what an improperly formatted api call looks lik
     
 {
     status : "fail",
-    data : { "title" : "A title is required" }
+    data : { "message" : "A title is required" }
 }
 
 ```
@@ -50,7 +50,7 @@ This shows a response example of what an internal error would return
     
 {
     status : "error",
-    message : "There was a database connection error"
+    data : { "message" : "There was a database connection error" }
 }
 
 ```
@@ -58,7 +58,8 @@ This shows a response example of what an internal error would return
 
 ## Current Points of Confusion
 ------------------------------
-Still don't know how to do the lecture uploading
+How will capturing system know what course id to upload to?
+-Maybe we need to make a GET for courses that takes in a name, semester, section etc. and returns an id?
 
 # Group Users
 
@@ -673,15 +674,9 @@ Adds a *group* of users by a file of _emails_ to the roster of the specified cou
 + Request (multipart/form-data; boundary=---BOUNDARY)
 
         -----BOUNDARY
-        Content-Disposition: form-data; name="text[file]"; filename="users.csv"
-        Content-Type: text/csv
-        Content-Transfer-Encoding: base64
+            Content-Disposition: form-data; name="upload"; filename="roster.csv"
+            Content-Type: text/plain
 
-        /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
-        HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
-        MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIA
-        AhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEB
-        AAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AL+AD//Z
         -----BOUNDARY
 
 + Response 200 (application/json)
@@ -756,11 +751,23 @@ Allows a lecture to be added manually such as a screencast
                 }
             }
 
-### TODO Add Lecture Auto [POST]
+### Add Lecture Auto [POST]
 Allows a lecture to be added automatically via the lecture capturing system
 
 + Parameters
     + course_id (string)...ID of the course
+
++ Request (multipart/form-data; boundary=---BOUNDARY)
+
+        -----BOUNDARY
+        Content-Disposition: form-data; name="upload"; filename="zippedFolder.zip"
+        Content-Type: application/x-zip-compressed
+
+        ----WebKitFormBoundary7MA4YWxkTrZu0gW
+        Content-Disposition: form-data; name="date"
+
+        1/2/3 1:22:11
+        -----BOUNDARY
 
 + Response 200 (application/json)
     + Body
@@ -842,7 +849,7 @@ Deletes a specified lecture
 
 # Group Attachments
 
-## Attachment Generic [/course/{course_id}/lecture/{lecture_id}/]
+## Attachment Generic [/course/{course_id}/lecture/{lecture_id}/attachment]
 
 + Parameters
     + course_id (string)...ID of the course
@@ -854,21 +861,15 @@ Adds an attachment to a lecture
 + Request (multipart/form-data; boundary=---BOUNDARY)
 
         -----BOUNDARY
-        Content-Disposition: form-data; name="jpg[file]"; filename="importantFile.jpg"
-        Content-Type: image/jpeg
-        Content-Transfer-Encoding: base64
+        Content-Disposition: form-data; name="upload"; filename="program1.js"
+        Content-Type: text/plain
 
-        /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
-        HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
-        MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIA
-        AhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEB
-        AAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AL+AD//Z
+
+        ----WebKitFormBoundary7MA4YWxkTrZu0gW
+        Content-Disposition: form-data; name="name"
+
+        Program 1
         -----BOUNDARY
-
-        {
-            "attachment_name" : "Special Instructions"
-        }
-
 
 + Response
     + Body
@@ -877,14 +878,14 @@ Adds an attachment to a lecture
                 "status" : "success",
                 "data" : {
                     "attachment_id" : "4972ddffcca200001234",
-                    "attachment_url" : "4972ddffcca200001234.jpg",
-                    "attachment_name" : "Special Instructions"
+                    "attachment_url" : "program1.js",
+                    "attachment_name" : "Program 1"
                     "course_id" : "144ffa1230001212",
                     "lecture_id" : "12ff51216aac0001"
                 }
             }
 
-## Attachment Specific [/course/{course_id}/lecture/{lecture_id}/{attachment_id}]
+## Attachment Specific [/course/{course_id}/lecture/{lecture_id}/attachment/{attachment_id}]
 
 + Parameters
     + course_id (string)...ID of the course
