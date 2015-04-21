@@ -5,6 +5,15 @@ FORMAT: 1A
 
 ><span style="color:orange;">NOTE: This is an *incomplete* API at the moment. The base url calls are all defined but not all of the request/response data is finalized</span>
 
+## Authentication
+-----------------
+<span style="font-size:16px" >Almost every API call defined in this document will require a user to be logegd in. To verify that you are logged in, you will pass a token to the backend with every API request you make. You can do this by setting the "Authorization" header in your request to pass the token that is returned by <a href="#page:authentication,header:authentication-auth-login-post"><b>login</b></a>.</span>
+
+```
+    Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+```
+
+
 ## API Responses
 ----------------
 
@@ -18,13 +27,16 @@ This shows a response example of what a correctly used api with no errors would 
 ```javascript
     
 {
-    status : "success",
-    data : {
-        "posts" : [
-            { "id" : 1, "title" : "A blog post", "body" : "Some useful content" },
-            { "id" : 2, "title" : "Another blog post", "body" : "More content" },
-        ]
-     }
+    "status" : "success",
+    "data" :
+        {
+            "first_name":"Jane",
+            "last_name":"Doe",
+            "email":"jdoe@umass.edu",
+            "role":"student",
+            "courses":[],
+            "user_id":"55366107d76f149f57d3ee56"
+        }
 }
 
 ```
@@ -36,8 +48,8 @@ This shows a response example of what an improperly formatted api call looks lik
 ```javascript
     
 {
-    status : "fail",
-    data : { "message" : "A title is required" }
+    "status" : "fail",
+    "data" : {"message":"Incorrect parameters"}
 }
 
 ```
@@ -49,8 +61,8 @@ This shows a response example of what an internal error would return
 ```javascript
     
 {
-    status : "error",
-    data : { "message" : "There was a database connection error" }
+    "status" : "error",
+    "data" : { "message" : "There was a database connection error" }
 }
 
 ```
@@ -58,8 +70,7 @@ This shows a response example of what an internal error would return
 
 ## Current Points of Confusion
 ------------------------------
-How will capturing system know what course id to upload to?
--Maybe we need to make a GET for courses that takes in a name, semester, section etc. and returns an id?
+
 
 # Group Users
 
@@ -85,28 +96,74 @@ Creates a new user
             {
                 "status": "success",
                 "data": {
-                    "user_id": "4cdfb11e1f3c000000007822",
+                    "user_id": "5536624cd76f149f57d3ee57",
                     "email" : "jdoe@umass.edu",
                     "first_name" : "Jane",
-                    "last_name" : "Doe"
+                    "last_name" : "Doe",
+                    "role": "student"
                 }
             }
             
 ### Get User [GET]
-Gets logged in user info (private)
+Gets current user info (private)
         
++ Response 200 (application/json)
+    + Body
+            {
+                "status":"success",
+                "data":{
+                    "first_name":"Jane",
+                    "last_name":"Doe",
+                    "email":"jdoe@umass.edu",
+                    "role":"student",
+                    "courses":[{"name" : "CS187 Data Structures", "course_id": "4cdfb11e1f3c000000007822"}],
+                    "user_id":"55366107d76f149f57d3ee56"
+                }
+            }
+
+### Update User [PUT]
+Updates the current user's info
+
++ Request
+    + Body
+
+            {
+                "first_name": "Jan",
+                "last_name": "Does"
+            }
+        
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "status":"success",
+                "data":{
+                    "first_name":"Jan",
+                    "last_name":"Does",
+                    "email":"jdoe@umass.edu",
+                    "role":"student",
+                    "courses":[{"name" : "CS187 Data Structures", "course_id": "4cdfb11e1f3c000000007822"}],
+                    "user_id":"55366107d76f149f57d3ee56"
+                }
+            }
+
+### Delete User [DELETE]
+Deletes the current user
+
 + Response 200 (application/json)
     + Body
     
             {
                 "status": "success",
                 "data":{
-                    "first_name": "Jane",
-                    "last_name": "Doe",
-                    "course_list": [{"name" : "CS187 Data Structures", "course_id": "4cdfb11e1f3c000000007822"}]
+                    "first_name":"Jane",
+                    "last_name":"Doe",
+                    "email":"jdoe@umass.edu",
+                    "role":"student",
+                    "courses":[{"name" : "CS187 Data Structures", "course_id": "4cdfb11e1f3c000000007822"}],
+                    "user_id":"55366107d76f149f57d3ee56"
                 }
             }
-
 
 ## User Specific [/user/{user_id}]
 These api calls will only be used by the specified user so giving an "id" param may be pointless...
@@ -126,36 +183,12 @@ Gets a user's info (public)
                 "data":{
                     "first_name": "Jane",
                     "last_name": "Doe",
-                    "profile_picture" : "bbb32283ff00004221.png"
-                }
-            }
-
-### Update User [PUT]
-Updates a user's info
-
-+ Request
-    + Body
-
-            {
-                "first_name": "Jan",
-                "last_name": "Does"
-            }
-        
-+ Response 200 (application/json)
-    + Body
-    
-            {
-                "status": "success",
-                "data":{
-                    "user_id":"17857351476173",
-                    "first_name": "Jane",
-                    "last_name": "Doe",
-                    "course_list": [{"name" : "CS187 Data Structures", "course_id": "4cdfb11e1f3c000000007822"}]
+                    "user_id": "5536624cd76f149f57d3ee57"
                 }
             }
 
 ### Delete User [DELETE]
-Deletes a user
+Deletes a user (admin)
 
 + Response 200 (application/json)
     + Body
@@ -163,7 +196,12 @@ Deletes a user
             {
                 "status": "success",
                 "data":{
-                    "user_id" : "17766664000ffdd10"
+                    "first_name":"Jane",
+                    "last_name":"Doe",
+                    "email":"jdoe@umass.edu",
+                    "role":"student",
+                    "courses":[{"name" : "CS187 Data Structures", "course_id": "4cdfb11e1f3c000000007822"}],
+                    "user_id":"55366107d76f149f57d3ee56"
                 }
             }
 
@@ -198,8 +236,8 @@ Allows a user to log into the system
     + Body
 
             {
-                "user_email" : "test@umass.edu",
-                "user_password" : "password"
+                "email" : "jdoe@umass.edu",
+                "password" : "password"
             }
 
 + Response 200 (application/json)
@@ -207,8 +245,8 @@ Allows a user to log into the system
 
             {
                 "status" : "success",
-                "data" :{
-                
+                "data" : {
+                    "token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
                 }
             }
 
@@ -216,7 +254,7 @@ Allows a user to log into the system
     + Body
 
             {
-                "status" : "failed",
+                "status" : "fail",
                 "data" :{
                     "message" : "The email and/or password are incorrect"
                 }
@@ -234,7 +272,7 @@ Allows a user to log themselves out of the system. Will delete session info on s
             {
                 "status" : "success",
                 "data" :{
-                
+                    
                 }
             }
 
@@ -617,14 +655,14 @@ Gets the roster of the specified course
                 "data" : {
                     roster : [
                         {
-                            "user_name" : "Jane Doe",
-                            "user_id" : "ffcc5143aa0000882",
-                            "profile_picture" : "http://path/to/pic.jpg"
+                            "first_name": "Jane",
+                            "last_name": "Doe",
+                            "user_id": "5536624cd76f149f57d3ee57"
                         },
                         {
-                            "user_name" : "Jan Itor",
-                            "user_id" : "abcc5143aa0000111",
-                            "profile_picture" : "http://path/to/pic.jpg"
+                            "first_name": "John",
+                            "last_name": "Doe",
+                            "user_id": "4536624cd76f149f57d3ee12"
                         }
                     ]
                 }
@@ -641,7 +679,7 @@ Adds a *single* user by _email_ to the roster of the specified course
     + Body
 
             {
-                "user_email" : "testuser@umass.edu"
+                "email" : "jdoe@umass.edu"
             }
 
 + Response 200 (application/json)
@@ -652,14 +690,14 @@ Adds a *single* user by _email_ to the roster of the specified course
                 "data" :{
                     roster : [
                         {
-                            "user_name" : "Jane Doe",
-                            "user_id" : "ffcc5143aa0000882",
-                            "profile_picture" : "http://path/to/pic.jpg"
+                            "first_name": "Jane",
+                            "last_name": "Doe",
+                            "user_id": "5536624cd76f149f57d3ee57"
                         },
                         {
-                            "user_name" : "Jan Itor",
-                            "user_id" : "abcc5143aa0000111",
-                            "profile_picture" : "http://path/to/pic.jpg"
+                            "first_name": "John",
+                            "last_name": "Doe",
+                            "user_id": "4536624cd76f149f57d3ee12"
                         }
                     ]
                 }
@@ -687,14 +725,14 @@ Adds a *group* of users by a file of _emails_ to the roster of the specified cou
                 "data" :{
                     roster : [
                         {
-                            "user_name" : "Jane Doe",
-                            "user_id" : "ffcc5143aa0000882",
-                            "profile_picture" : "http://path/to/pic.jpg"
+                            "first_name": "Jane",
+                            "last_name": "Doe",
+                            "user_id": "5536624cd76f149f57d3ee57"
                         },
                         {
-                            "user_name" : "Jan Itor",
-                            "user_id" : "abcc5143aa0000111",
-                            "profile_picture" : "http://path/to/pic.jpg"
+                            "first_name": "John",
+                            "last_name": "Doe",
+                            "user_id": "4536624cd76f149f57d3ee12"
                         }
                     ]
                 }
@@ -716,7 +754,9 @@ Removes a specified user from the specified course
             {
                 "status" : "success",
                 "data" : {
-                    "user_id" : "ffa4142cc00001213"
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "user_id": "4536624cd76f149f57d3ee12"
                 }
             }
 
