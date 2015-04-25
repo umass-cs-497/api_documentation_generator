@@ -536,6 +536,27 @@ Adds a course to the system
                 }
             }
 
+
+### Get Courses [GET]
+Gets all of the courses' meta data
+
+
++ Response 200 (application/json)
+    + Body
+            
+            {
+                "department" : "Computer Science",
+                "department_shorthand" : "CS",
+                "course_name" : "Web Scalability",
+                "course_number" : "497s",
+                "section" : "01",
+                "term" : "Spring",
+                "year" : "2015",
+                "instructor_id" : "23ffaaccdd2330002288"
+            }
+
+
+
 ##Course Specific [/course/{course_id}]
 
 
@@ -967,27 +988,27 @@ Gets the comments for the specified lecture
                 "data" : {
                     "commments" : [
                         {
-                            "name": "Bill Howard",
-                            "user_id": "190accdff12700001123",
+                            "comment_id" : "223accdff12700003333",
+                            "poster_name": "Bill Howard",
+                            "poster_id": "190accdff12700001123",
                             "posted_date": "19836263546",
                             "time" : "1234",
                             "content": "Explain slide 55 in more detail please",
                             "replies": [
                                 {
-                                    "name": "Jane Doe",
-                                    "user_id": "12aacdd12700004444",
+                                    "comment_id" : "333accdff12700003333",
+                                    "poster_name": "Jane Doe",
+                                    "poster_id": "12aacdd12700004444",
                                     "posted_date": "19836293546",
                                     "time" : "1234",
                                     "content": "It's talking about the internet",
-                                    "replies": [
-                                    
-                                    ]
                                 }
                             ]
                         },
                         {
-                            "name": "John Doe",
-                            "user_id": "999fcdff12700005353",
+                            "comment_id" : "443accdff12700003333",
+                            "poster_name": "John Doe",
+                            "poster_id": "999fcdff12700005353",
                             "posted_date": "19836213516",
                             "time" : "1234",
                             "content": "This was a really helpful part of the lecture.",
@@ -1007,7 +1028,7 @@ Adds a new comment to the specified lecture
 
             {
                 "content" : "Is this the krusty krab?",
-                "posted_date" : "23252323232"
+                "posted_date" : "23252323232",
                 "time" : "1234"
             }
 
@@ -1019,7 +1040,7 @@ Adds a new comment to the specified lecture
                 "data" : {
                     "comment_id" : "123bcda1300002211",
                     "content" : "Is this the krusty krab?",
-                    "posted_date" : "23252323232"
+                    "posted_date" : "23252323232",
                     "time" : "1234"
                 }
             }
