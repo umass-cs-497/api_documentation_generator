@@ -3,7 +3,7 @@ FORMAT: 1A
 #Lecture Viewer API
 <span style="font-size:16px" >LectureViewer API will be utilized by the React front end and will allow for CRUD operations by being the middle man for the database. </span>
 
-><span style="color:orange;">NOTE: This is an *incomplete* API at the moment. The base url calls are all defined but not all of the request/response data is finalized</span>
+><span style="color:orange;">This API is almost complete. There may still be some minor errors. You shouldn't expect any more drastic changes.</span>
 
 ## Authentication
 -----------------
@@ -94,14 +94,15 @@ Creates a new user
     + Body
 
             {
-                "status": "success",
-                "data": {
-                    "user_id": "5536624cd76f149f57d3ee57",
-                    "email" : "jdoe@umass.edu",
-                    "first_name" : "Jane",
-                    "last_name" : "Doe",
-                    "role": "student"
-                }
+                "status":"success",
+                "data":{
+                        "first_name":"Jane",
+                        "last_name":"Doe",
+                        "email":"jdoe@umass.edu",
+                        "role":"student",
+                        "courses":[],
+                        "user_id":"5543a1f3b712aa6b2f97ede0"
+                    }
             }
             
 ### Get User [GET]
@@ -211,7 +212,7 @@ Deletes a user (admin)
 ## Auth Verify [/auth/verify/{verify_id}]
 
 + Parameters
-    + verify_id (string)...Randomly generated unique number that was emailed in a link to the user
+    + verify_id (string)...Encrypted token that was emailed in a link to the user
 
 ### Verification [GET]
 Allows a user to verify that they own their email.
@@ -404,8 +405,12 @@ Deletes a specified bookmark based on it's ID
     
             {
                 "status" : "success",
-                "data" : {
-                    "bookmark_id" : "dfaa1e1f3c23000000007855"
+                "data":{
+                    "bookmark_id" : "dfaa1e1f3c23000000007855",
+                    "course_id" : "aaaa1e1f3c23000000007855",
+                    "lecture_id" : "4cdfb11e1f3c000000007822",
+                    "label" : "New Bookmark! :D",
+                    "time" : "140"
                 }
             }
 
@@ -453,18 +458,21 @@ Gets all of the current user's bookmarks for a specified course
             {
                 "status" : "success",
                 "data" : {
+                        "course_id" : "aaaa1e1f3c23000000007555",
                         "bookmarks" : [
                             {
                                 "bookmark_id" : "bbda1e1f3c23000000007551",
                                 "label" : "This is a bookmark!",
                                 "time" : "2000",
-                                "lecture_id" : "dfaa1e1f3c23000000007855"
+                                "course_id" : "aaaa1e1f3c23000000007855",
+                                "lecture_id" : "4cdfb11e1f3c000000007822",
                             },
                             {
                                 "bookmark_id" : "bbda1e1f3c23000000001111",
                                 "label" : "This is a bookmark too!",
                                 "time" : "11",
-                                "lecture_id" : "ccca1e1f3c23000000007444"
+                                "course_id" : "aaaa1e1f3c23000000007855",
+                                "lecture_id" : "4cdfb11e1f3c000000007822",
                             },
                         ]
                 }
@@ -486,16 +494,22 @@ Gets all of the current user's bookmarks for a specified lecture
             {
                 "status" : "success",
                 "data" : {
+                        "course_id" : "aaaa1e1f3c23000000007555",
+                        "lecture_id" : "bbaa1e1f3c23000000007111",
                         "bookmarks" : [
                             {
                                 "bookmark_id" : "bbda1e1f3c23000000007551",
                                 "label" : "This is a bookmark!",
-                                "time" : "27854724576"
+                                "time" : "27854724576",
+                                "course_id" : "aaaa1e1f3c23000000007855",
+                                "lecture_id" : "4cdfb11e1f3c000000007822"
                             },
                             {
                                 "bookmark_id" : "bbda1e1f3c23000000001111",
                                 "label" : "This is a bookmark too!",
-                                "time" : "27854714576"
+                                "time" : "27854714576",
+                                "course_id" : "aaaa1e1f3c23000000007855",
+                                "lecture_id" : "4cdfb11e1f3c000000007822"
                             },
                         ]
                 }
@@ -513,11 +527,13 @@ Adds a course to the system
     
             {
                 "department" : "Computer Science",
-                "course_name" : "Web Scalability",
+                "course_title" : "Web Scalability",
                 "course_number" : "497s",
+                "section" : "01",
+                "description" : "A course where you build things then realize you forgot a bunch of stuff.",
                 "term" : "Spring",
                 "year" : "2015",
-                "instructor_email" : "instructor@umass.edu"
+                "instructor_emails" : ["instructor@umass.edu", "ta@umass.edu"]
             }
 
 + Response 200 (application/json)
@@ -528,11 +544,25 @@ Adds a course to the system
                 "data" : {
                     "course_id" : "55aadfeecd3300113344",
                     "department" : "Computer Science",
-                    "course_name" : "Web Scalability",
+                    "course_title" : "Web Scalability",
                     "course_number" : "497s",
+                    "section" : "01",
+                    "description" : "A course where you build things then realize you forgot a bunch of stuff.",
                     "term" : "Spring",
                     "year" : "2015",
-                    "instructor_email" : "instructor@umass.edu"
+                    "lectures" : [],
+                    "instructors" : [
+                        {
+                            "user_id" : "1123dfeecd3300113344",
+                            "first_name" : "Tim",
+                            "last_name" : "Richards"
+                        }, 
+                        {
+                            "user_id" : "1123dfeecd3300113555",
+                            "first_name" : "TA",
+                            "last_name" : "Jones"
+                        }
+                    ]
                 }
             }
 
@@ -545,16 +575,52 @@ Gets all of the courses' meta data
     + Body
             
             {
-                "department" : "Computer Science",
-                "department_shorthand" : "CS",
-                "course_name" : "Web Scalability",
-                "course_number" : "497s",
-                "section" : "01",
-                "term" : "Spring",
-                "year" : "2015",
-                "instructor_id" : "23ffaaccdd2330002288"
+                "status" : "success",
+                "data" : [{
+                    "course_id" : "55aadfeecd3300113344",
+                    "department" : "Computer Science",
+                    "course_title" : "Web Scalability",
+                    "course_number" : "497s",
+                    "section" : "01",
+                    "description" : "A course where you build things then realize you forgot a bunch of stuff.",
+                    "term" : "Spring",
+                    "year" : "2015",
+                    "instructors" : [
+                        {
+                            "user_id" : "1123dfeecd3300113344",
+                            "first_name" : "Tim",
+                            "last_name" : "Richards"
+                        }, 
+                        {
+                            "user_id" : "1123dfeecd3300113555",
+                            "first_name" : "TA",
+                            "last_name" : "Jones"
+                        }
+                    ]
+                },
+                {
+                    "course_id" : "11aadfeecd3300113344",
+                    "department" : "Computer Science",
+                    "course_title" : "Web Programming",
+                    "course_number" : "326",
+                    "section" : "01",
+                    "description" : "A course where you realize angular is tough.",
+                    "term" : "Spring",
+                    "year" : "2015",
+                    "instructors" : [
+                        {
+                            "user_id" : "1123dfeecd3300113344",
+                            "first_name" : "Tim",
+                            "last_name" : "Richards"
+                        }, 
+                        {
+                            "user_id" : "1123dfeecd3300113555",
+                            "first_name" : "TA",
+                            "last_name" : "Jones"
+                        }
+                    ]
+                }]
             }
-
 
 
 ##Course Specific [/course/{course_id}]
@@ -571,39 +637,48 @@ Gets all of the information for a specified course
     + Body
             
             {
-                "department" : "Computer Science",
-                "department_shorthand" : "CS",
-                "course_name" : "Web Scalability",
-                "course_number" : "497s",
-                "description" : "A \"class\" about web stuff",
-                "section" : "01",
-                "term" : "Spring",
-                "year" : "2015",
-                "instructor_id" : "23ffaaccdd2330002288",
-                "lectures":
-                    [
+                "status" : "success",
+                "data" : {
+                    "course_id" : "55aadfeecd3300113344",
+                    "department" : "Computer Science",
+                    "course_title" : "Web Scalability",
+                    "course_number" : "497s",
+                    "section" : "01",
+                    "description" : "A course where you build things then realize you forgot a bunch of stuff.",
+                    "term" : "Spring",
+                    "year" : "2015",
+                    "instructors" : [
+                        {
+                            "user_id" : "1123dfeecd3300113344",
+                            "first_name" : "Tim",
+                            "last_name" : "Richards"
+                        }, 
+                        {
+                            "user_id" : "1123dfeecd3300113555",
+                            "first_name" : "TA",
+                            "last_name" : "Jones"
+                        }
+                    ],
+                    "lectures":[
                         {
                             "lecture_id" : "27dcccad253452a00011",
-                            "title" : "Lecture 4: What is the Interwebs?",
+                            "title" : "Lecture 1: What is the Interwebs?",
                             "description" : "This lecture is awesome and you don't want to miss it",
-                            "time_posted" : "1337622367267",
-                            "time_length" : "3026",
-                            "thumbnail" : "http://url.to/thumbnail/here.jpg"
+                            "date_posted" : "2015-01-22T14:55:01Z"
                         },
                         {
                             "lecture_id" : "113ccad253452a00222",
-                            "title" : "Lecture 5: Databases",
+                            "title" : "Lecture 2: Databases",
                             "description" : "We will talk about how to store huge amounts of data",
-                            "time_posted" : "1337623117267",
-                            "time_length" : "2026",
-                            "thumbnail" : "http://url.to/thumbnail/here.jpg"
+                            "date_posted" : "2015-01-22T14:55:01Z",
                         }
                     ]
+                }
             }
 
 
 ### Edit Course [PUT]
-Edits a course's basic information
+Edits a course's basic information. Everything provided in the edit will overwrite whats currently in the db
 
 + Parameters
     + course_id (string)...ID for specified course
@@ -613,14 +688,13 @@ Edits a course's basic information
         
             {
                 "department" : "Computer Science",
-                "department_shorthand" : "CS",
-                "course_name" : "Web Scalability",
+                "course_title" : "Web Scalability",
                 "course_number" : "497s",
-                "description" : "A \"class\" about web stuff",
                 "section" : "01",
+                "description" : "A course where you build things then realize you forgot a bunch of stuff.",
                 "term" : "Spring",
                 "year" : "2015",
-                "instructor_email" : "instructor@umass.edu"
+                "instructor_emails" : ["instructor@umass.edu"]
             }
 
 + Response 200 (application/json)
@@ -631,14 +705,19 @@ Edits a course's basic information
                 "data" : {
                     "course_id" : "aabbf22313f0001231",
                     "department" : "Computer Science",
-                    "department_shorthand" : "CS",
-                    "course_name" : "Web Scalability",
+                    "course_title" : "Web Scalability",
                     "course_number" : "497s",
-                    "description" : "A \"class\" about web stuff",
                     "section" : "01",
+                    "description" : "A course where you build things then realize you forgot a bunch of stuff.",
                     "term" : "Spring",
                     "year" : "2015",
-                    "instructor_email" : "instructor@umass.edu"
+                    "instructors" : [
+                        {
+                            "user_id" : "1123dfeecd3300113344",
+                            "first_name" : "Tim",
+                            "last_name" : "Richards"
+                        }
+                    ]
                 }
             }
 
@@ -654,7 +733,40 @@ Deletes a specified course
             {
                 "status" : "success",
                 "data" : {
-                    "course_id" : "aabbf22313f0001231"
+                    "course_id" : "55aadfeecd3300113344",
+                    "department" : "Computer Science",
+                    "course_title" : "Web Scalability",
+                    "course_number" : "497s",
+                    "section" : "01",
+                    "description" : "A course where you build things then realize you forgot a bunch of stuff.",
+                    "term" : "Spring",
+                    "year" : "2015",
+                    "instructors" : [
+                        {
+                            "user_id" : "1123dfeecd3300113344",
+                            "first_name" : "Tim",
+                            "last_name" : "Richards"
+                        }, 
+                        {
+                            "user_id" : "1123dfeecd3300113555",
+                            "first_name" : "TA",
+                            "last_name" : "Jones"
+                        }
+                    ],
+                    "lectures":[
+                        {
+                            "lecture_id" : "27dcccad253452a00011",
+                            "title" : "Lecture 1: What is the Interwebs?",
+                            "description" : "This lecture is awesome and you don't want to miss it",
+                            "date_posted" : "2015-01-22T14:55:01Z"
+                        },
+                        {
+                            "lecture_id" : "113ccad253452a00222",
+                            "title" : "Lecture 2: Databases",
+                            "description" : "We will talk about how to store huge amounts of data",
+                            "date_posted" : "2015-01-22T14:55:01Z",
+                        }
+                    ]
                 }
             }
 
@@ -678,11 +790,13 @@ Gets the roster of the specified course
                         {
                             "first_name": "Jane",
                             "last_name": "Doe",
+                            "email" : "jadoe@umass.edu",
                             "user_id": "5536624cd76f149f57d3ee57"
                         },
                         {
                             "first_name": "John",
                             "last_name": "Doe",
+                            "email" : "jadoe@umass.edu",
                             "user_id": "4536624cd76f149f57d3ee12"
                         }
                     ]
@@ -700,7 +814,7 @@ Adds a *single* user by _email_ to the roster of the specified course
     + Body
 
             {
-                "email" : "jdoe@umass.edu"
+                "email" : "jodoe@umass.edu"
             }
 
 + Response 200 (application/json)
@@ -713,19 +827,21 @@ Adds a *single* user by _email_ to the roster of the specified course
                         {
                             "first_name": "Jane",
                             "last_name": "Doe",
-                            "user_id": "5536624cd76f149f57d3ee57"
+                            "user_id": "5536624cd76f149f57d3ee57",
+                            "email" : "jadoe@umass.edu"
                         },
                         {
                             "first_name": "John",
                             "last_name": "Doe",
-                            "user_id": "4536624cd76f149f57d3ee12"
+                            "user_id": "4536624cd76f149f57d3ee12",
+                            "email" : "jodoe@umass.edu"
                         }
                     ]
                 }
             }
 
 ###Add Users To Roster [POST]
-Adds a *group* of users by a file of _emails_ to the roster of the specified course 
+Adds a *group* of users by a file of _emails_ to the roster of the specified course. This call will eventually require an "overwrite" field. This could allow you to overwrite or just append new users. After that, it should also respond with a confirmation... But thats for later :P
 
 + Parameters
     + course_id (string)...ID of the course
@@ -748,12 +864,20 @@ Adds a *group* of users by a file of _emails_ to the roster of the specified cou
                         {
                             "first_name": "Jane",
                             "last_name": "Doe",
+                            "email" : "jadoe@umass.edu",
                             "user_id": "5536624cd76f149f57d3ee57"
                         },
                         {
                             "first_name": "John",
                             "last_name": "Doe",
+                            "email" : "jodoe@umass.edu",
                             "user_id": "4536624cd76f149f57d3ee12"
+                        }
+                        {
+                            "first_name": "",
+                            "last_name": "",
+                            "email" : "hdoe@umass.edu",
+                            "user_id": "4636624cd76f149f57d3ee00"
                         }
                     ]
                 }
@@ -777,6 +901,7 @@ Removes a specified user from the specified course
                 "data" : {
                     "first_name": "John",
                     "last_name": "Doe",
+                    "email" : "jodoe@umass.edu",
                     "user_id": "4536624cd76f149f57d3ee12"
                 }
             }
@@ -786,21 +911,36 @@ Removes a specified user from the specified course
 
 ## Lecture Generic [/course/{course_id}/lecture]
 
-###TODO Add Lecture Man. [POST]
+###Add Lecture Man. [POST]
 Allows a lecture to be added manually such as a screencast
 
 + Parameters
     + course_id (string)...ID of the course
 
-+ Request
-    + Body
++ Request (multipart/form-data; boundary=---BOUNDARY)
 
-            {
-                "title" : "Lecture 1: How to API",
-                "description" : "For this lecture, we will just REST",
+        -----BOUNDARY
+
+            ----WebKitFormBoundary7MA4YWxkTrZu0gW
+            Content-Disposition: form-data; name="upload"; filename="video.mp4"
+            Content-Type: video/mp4
 
 
-            }
+            ----WebKitFormBoundary7MA4YWxkTrZu0gW
+            Content-Disposition: form-data; name="title"
+
+            Lecture 1: How to API
+            ----WebKitFormBoundary7MA4YWxkTrZu0gW
+            Content-Disposition: form-data; name="description"
+
+            For this lecture, we will just REST
+            ----WebKitFormBoundary7MA4YWxkTrZu0gW
+            Content-Disposition: form-data; name="manual"
+
+            true
+            ----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+        -----BOUNDARY
 
 + Response 200 (application/json)
     + Body
@@ -821,23 +961,73 @@ Allows a lecture to be added automatically via the lecture capturing system
 + Request (multipart/form-data; boundary=---BOUNDARY)
 
         -----BOUNDARY
-        Content-Disposition: form-data; name="upload"; filename="zippedFolder.zip"
-        Content-Type: application/x-zip-compressed
+
+        Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
         ----WebKitFormBoundary7MA4YWxkTrZu0gW
-        Content-Disposition: form-data; name="date"
+        Content-Disposition: form-data; name="upload"; filename="small sample.zip"
+        Content-Type: application/x-zip-compressed
 
-        1/2/3 1:22:11
+
+        ----WebKitFormBoundary7MA4YWxkTrZu0gW
+        Content-Disposition: form-data; name="start_time"
+
+        1421938501
+        ----WebKitFormBoundary7MA4YWxkTrZu0gW
+
         -----BOUNDARY
 
 + Response 200 (application/json)
     + Body
 
             {
-                "status" : "success",
-                "data" : {
-                    "lecture_id" : "ff2653ca16000ff32cd"
-                }
+                "status":"success",
+                "data":
+                    {
+                        "lecture_id":"5543c76fb4e69ad1268964d7",
+                        "course_id":"dfaa1e1f3c23000100007855",
+                        "date":"2015-01-22T14:55:02.000Z",
+                        "title":"",
+                        "visible":false,
+                        "description":"",
+                        "video_url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/video.mp4",
+                        "screen_image_urls":[
+                            {
+                                "time":504,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939006-0.png"
+                            },
+                            {
+                                "time":528,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939030-0.png"
+                            },
+                            {
+                                "time":611,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939113-0.png"
+                            },
+                            {
+                                "time":827,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939329-0.png"
+                            }
+                        ],
+                        "whiteboard_image_urls":[
+                            {
+                                "time":6,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938508-0.png"
+                            },
+                            {
+                                "time":276,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938778-0.png"
+                            },
+                            {
+                                "time":284,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938786-0.png"
+                            },
+                            {
+                                "time":342,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938844-0.png"
+                            }
+                        ]
+                    }
             }
 
 ## Lecture Specific [/course/{course_id}/lecture/{lecture_id}]
@@ -854,14 +1044,53 @@ Gets a specified lecture
     + Body
 
             {
-                "status" : "success",
-                "data" : {
-                    "title" : "Lecture 4: What is the Interwebs?",
-                    "description" : "This lecture is awesome and you don't want to miss it",
-                    "time_posted" : "1337622367267",
-                    "time_length" : "3026",
-                    "thumbnail" : "http://url.to/thumbnail/here.jpg"
-                }
+                "status":"success",
+                "data":
+                    {
+                        "lecture_id":"5543c76fb4e69ad1268964d7",
+                        "course_id":"dfaa1e1f3c23000100007855",
+                        "date":"2015-01-22T14:55:02.000Z",
+                        "title":"",
+                        "visible":false,
+                        "description":"",
+                        "video_url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/video.mp4",
+                        "screen_image_urls":[
+                            {
+                                "time":504,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939006-0.png"
+                            },
+                            {
+                                "time":528,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939030-0.png"
+                            },
+                            {
+                                "time":611,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939113-0.png"
+                            },
+                            {
+                                "time":827,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939329-0.png"
+                            }
+                        ],
+                        "whiteboard_image_urls":[
+                            {
+                                "time":6,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938508-0.png"
+                            },
+                            {
+                                "time":276,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938778-0.png"
+                            },
+                            {
+                                "time":284,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938786-0.png"
+                            },
+                            {
+                                "time":342,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938844-0.png"
+                            }
+                        ]
+                    }
             }
 
 ### Edit A Lecture [PUT]
@@ -872,25 +1101,60 @@ Edits a specified lecture
             {
                 "title" : "Lecture 4: What is the Interwebs?",
                 "description" : "This lecture is awesome and you don't want to miss it",
-                "time_posted" : "1337622367267",
-                "time_length" : "3026",
-                "thumbnail" : "http://url.to/thumbnail/here.jpg"
+                "visible" : "true"
             }
 
 + Response 200 (application/json)
     + Body
 
             {
-                "status" : "success",
-                "data" : {
-                    "course_id" : "225ccddaadc100021212",
-                    "lecture_id" : "27dcccad253452a00011",
-                    "title" : "Lecture 4: What is the Interwebs?",
-                    "description" : "This lecture is awesome and you don't want to miss it",
-                    "time_posted" : "1337622367267",
-                    "time_length" : "3026",
-                    "thumbnail" : "http://url.to/thumbnail/here.jpg"
-                }
+                "status":"success",
+                "data":
+                    {
+                        "lecture_id":"5543c76fb4e69ad1268964d7",
+                        "course_id":"dfaa1e1f3c23000100007855",
+                        "date":"2015-01-22T14:55:02.000Z",
+                        "title":"Lecture 4: What is the Interwebs?",
+                        "visible":true,
+                        "description":"This lecture is awesome and you don't want to miss it",
+                        "video_url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/video.mp4",
+                        "screen_image_urls":[
+                            {
+                                "time":504,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939006-0.png"
+                            },
+                            {
+                                "time":528,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939030-0.png"
+                            },
+                            {
+                                "time":611,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939113-0.png"
+                            },
+                            {
+                                "time":827,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939329-0.png"
+                            }
+                        ],
+                        "whiteboard_image_urls":[
+                            {
+                                "time":6,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938508-0.png"
+                            },
+                            {
+                                "time":276,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938778-0.png"
+                            },
+                            {
+                                "time":284,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938786-0.png"
+                            },
+                            {
+                                "time":342,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938844-0.png"
+                            }
+                        ]
+                    }
             }
 
 ### Delete A Lecture [DELETE]
@@ -900,15 +1164,59 @@ Deletes a specified lecture
     + Body
 
             {
-                "status" : "success",
-                "data" : {
-                    "course_id" : "121314000ff121",
-                    "lecture_id" : "abbf3141000023"
-                }
+                "status":"success",
+                "data":
+                    {
+                        "lecture_id":"5543c76fb4e69ad1268964d7",
+                        "course_id":"dfaa1e1f3c23000100007855",
+                        "date":"2015-01-22T14:55:02.000Z",
+                        "title":"Lecture 4: What is the Interwebs?",
+                        "visible":true,
+                        "description":"This lecture is awesome and you don't want to miss it",
+                        "video_url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/video.mp4",
+                        "screen_image_urls":[
+                            {
+                                "time":504,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939006-0.png"
+                            },
+                            {
+                                "time":528,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939030-0.png"
+                            },
+                            {
+                                "time":611,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939113-0.png"
+                            },
+                            {
+                                "time":827,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/computer/computer1421939329-0.png"
+                            }
+                        ],
+                        "whiteboard_image_urls":[
+                            {
+                                "time":6,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938508-0.png"
+                            },
+                            {
+                                "time":276,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938778-0.png"
+                            },
+                            {
+                                "time":284,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938786-0.png"
+                            },
+                            {
+                                "time":342,
+                                "url":"lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/whiteboard/whiteBoard1421938844-0.png"
+                            }
+                        ]
+                    }
             }
 
 
 # Group Attachments
+Not being implemented on V1. Would be a nice and easy addition if we get time though.
+
 
 ## Attachment Generic [/course/{course_id}/lecture/{lecture_id}/attachment]
 
@@ -939,7 +1247,7 @@ Adds an attachment to a lecture
                 "status" : "success",
                 "data" : {
                     "attachment_id" : "4972ddffcca200001234",
-                    "attachment_url" : "program1.js",
+                    "attachment_url" : "lectureviewer.com/media/dfaa1e1f3c23000100007855/d65ec8f0-f030-11e4-a263-ff1e2df999ef/attachments/program1.js",
                     "attachment_name" : "Program 1"
                     "course_id" : "144ffa1230001212",
                     "lecture_id" : "12ff51216aac0001"
@@ -986,6 +1294,8 @@ Gets the comments for the specified lecture
             {
                 "status" : "success",
                 "data" : {
+                    "course_id" : "4972ddffcca200001234",
+                    "lecture_id" : "2272ddffcca200001222",
                     "commments" : [
                         {
                             "comment_id" : "223accdff12700003333",
@@ -1038,6 +1348,8 @@ Adds a new comment to the specified lecture
             {
                 "status" : "success",
                 "data" : {
+                    "course_id" : "144ffa1230001212",
+                    "lecture_id" : "12ff51216aac0001"
                     "comment_id" : "123bcda1300002211",
                     "content" : "Is this the krusty krab?",
                     "posted_date" : "23252323232",
@@ -1063,7 +1375,10 @@ Deletes the specified comment (We may need to keep the comment but change the co
                 "data" : {
                     "comment_id" : "4972ddffcca200001234",
                     "course_id" : "144ffa1230001212",
-                    "lecture_id" : "12ff51216aac0001"
+                    "lecture_id" : "12ff51216aac0001",
+                    "content" : "Is this the krusty krab?",
+                    "posted_date" : "23252323232",
+                    "time" : "1234"
                 }
             }
 
@@ -1110,6 +1425,8 @@ Replies to a specified comment
             {
                 "status" : "success",
                 "data" : {
+                    "course_id" : "144ffa1230001212",
+                    "lecture_id" : "12ff51216aac0001"
                     "parent_comment_id" : "4972ddffcca200001234",
                     "reply_comment_id" : "ffacd34529800002422",
                     "content" : "No this is patrick.",
